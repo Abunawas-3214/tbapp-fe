@@ -2,6 +2,7 @@ export interface StoreAccessDTO {
 	id: string;
 	name: string;
 	slug: string;
+	role: string;
 	schema_name: string;
 }
 

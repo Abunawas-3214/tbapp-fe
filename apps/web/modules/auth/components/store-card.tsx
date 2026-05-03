@@ -1,7 +1,54 @@
-import React from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Building03Icon } from "@hugeicons/core-free-icons"
+import {
+	Card,
+	CardContent,
+} from "@workspace/ui/components/card"
+import { cn } from "@workspace/ui/lib/utils"
 
-export default function StoreCard() {
+interface StoreCardProps {
+	name?: string
+	description?: string
+	role?: string
+	className?: string
+}
+
+export default function StoreCard({
+	name = "Nama Toko",
+	description = "Pilih toko ini untuk melanjutkan",
+	role,
+	className
+}: StoreCardProps) {
 	return (
-		<div>storeCard</div>
+		<Card className={cn(
+			"w-64 cursor-pointer transition-all duration-500 ease-out",
+			"hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2",
+			"group border-2 hover:border-primary/40 overflow-hidden",
+			className
+		)}>
+			<CardContent className="flex flex-col items-center justify-center p-4 gap-4">
+				<div className="relative">
+					<div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700 ease-out opacity-0 group-hover:opacity-100" />
+					<div className="relative p-5 rounded-3xl bg-muted/50 group-hover:bg-primary/10 transition-colors duration-500">
+						<HugeiconsIcon
+							icon={Building03Icon}
+							size={80}
+							strokeWidth={1.5}
+							className="text-muted-foreground/60 group-hover:text-primary transition-all duration-500 transform group-hover:scale-110"
+						/>
+					</div>
+				</div>
+				<div className="text-center space-y-4 flex flex-col items-center">
+					<h3 className="font-bold text-2xl tracking-tight group-hover:text-primary transition-colors duration-300">
+						{name}
+					</h3>
+					{role && (
+						<span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary transition-colors">
+							{role}
+						</span>
+					)}
+				</div>
+			</CardContent>
+		</Card>
 	)
 }

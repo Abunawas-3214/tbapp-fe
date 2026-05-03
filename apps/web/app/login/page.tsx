@@ -2,8 +2,16 @@ import { LoginForm } from "@/modules/auth/components/login-form"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Building03Icon } from "@hugeicons/core-free-icons"
 import Link from "next/link"
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth()
+
+  if ((session?.user?.stores && session?.user?.stores.length > 0)) {
+    redirect("/pilih-toko")
+  }
+
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">

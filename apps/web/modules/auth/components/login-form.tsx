@@ -13,7 +13,6 @@ import {
 import { Input } from "@workspace/ui/components/input"
 import { useActionState, useEffect, useState, startTransition } from "react"
 import { loginAction } from "../actions/login"
-import { useRouter } from "next/navigation"
 
 import { toast } from "sonner"
 
@@ -24,7 +23,6 @@ export function LoginForm({
   const [errors, setErrors] = useState<{ email?: string; password?: string; root?: string }>({})
   const [serverError, setServerError] = useState(false)
   const [state, formAction, isPending] = useActionState(loginAction, null)
-  const router = useRouter()
 
   useEffect(() => {
     if (state?.error) {
@@ -64,10 +62,10 @@ export function LoginForm({
   }
 
   return (
-    <form 
-      className={cn("flex flex-col gap-6", className)} 
-      {...props} 
-      onSubmit={handleLogin} 
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+      onSubmit={handleLogin}
       onChange={(e) => {
         if (serverError) setServerError(false)
         const target = e.target as unknown as HTMLInputElement

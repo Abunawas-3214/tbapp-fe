@@ -8,7 +8,6 @@ export async function loginAction(prevState: any, formData: FormData) {
     await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
-      redirectTo: "/",
     })
   } catch (error) {
     if (error instanceof AuthError) {
