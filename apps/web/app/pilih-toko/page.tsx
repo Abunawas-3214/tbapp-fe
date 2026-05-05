@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth"
 import StoreCard from "@/modules/auth/components/store-card"
-import { redirect } from "next/navigation"
 import Link from "next/link"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft02Icon } from "@hugeicons/core-free-icons"
@@ -8,13 +7,7 @@ import { StoreAccessDTO } from "@/modules/auth/types"
 
 export default async function PilihTokoPage() {
 	const session = await auth()
-
-	if (!session) {
-		redirect("/login")
-	}
-
-	const stores = session.user.stores || []
-	console.log(session)
+	const stores = session?.stores || []
 
 	return (
 		<div className="flex flex-col items-center justify-center min-h-svh p-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
@@ -28,20 +21,16 @@ export default async function PilihTokoPage() {
 			</div>
 
 			<div className="flex flex-wrap gap-10 justify-center items-center max-w-6xl animate-in fade-in zoom-in-95 duration-1000 delay-200">
-				{stores.length === 0 ? (
-					<StoreCard
-						name="Toko Demo"
-						description="Anda belum memiliki toko. Hubungi admin untuk ditambahkan ke toko."
-					/>
-				) : (
+				{
 					stores.map((store: StoreAccessDTO, index: number) => (
 						<StoreCard
 							key={store.id || index}
+							storeId={store.id}
 							name={store.name}
 							role={store.role}
 						/>
 					))
-				)}
+				}
 			</div>
 
 			<div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">

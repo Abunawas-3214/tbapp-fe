@@ -8,8 +8,12 @@ import { redirect } from "next/navigation"
 export default async function LoginPage() {
   const session = await auth()
 
-  if ((session?.user?.stores && session?.user?.stores.length > 0)) {
+  if ((session?.stores && session.stores.length > 0)) {
     redirect("/pilih-toko")
+  }
+
+  if (session?.user.adminLevel) {
+    redirect("/")
   }
 
   return (

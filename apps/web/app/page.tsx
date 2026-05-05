@@ -4,6 +4,7 @@ import { auth, signOut } from "@/lib/auth"
 
 export default async function Page() {
   const session = await auth()
+  console.log(session)
   return (
     <div className="flex min-h-svh p-6">
       <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
@@ -26,9 +27,18 @@ export default async function Page() {
                 <Button >Login</Button>
               </Link>
             )}
-            {session?.user.stores && (
-              <Link href={"/pilih-toko"}>
-                <Button>Pilih Toko</Button>
+            {session?.stores && (
+              (!session.stores) ?
+                <Link href={"/pilih-toko"}>
+                  <Button>Pilih Toko</Button>
+                </Link> :
+                <Link href={"https://app.tbapp.test"}>
+                  <Button>Masuk ruang kerja toko: {session.store?.name} </Button>
+                </Link>
+            )}
+            {session?.user.adminLevel && (
+              <Link href={"https://admin.tbapp.test"}>
+                <Button>Masuk ruang kerja admin</Button>
               </Link>
             )}
           </div>

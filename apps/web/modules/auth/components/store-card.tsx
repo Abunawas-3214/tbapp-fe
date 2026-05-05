@@ -1,3 +1,11 @@
+"use client"
+
+import { useTransition } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { selectStoreAction } from "../actions/select-store"
+
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Building03Icon } from "@hugeicons/core-free-icons"
 import {
@@ -7,25 +15,57 @@ import {
 import { cn } from "@workspace/ui/lib/utils"
 
 interface StoreCardProps {
+	storeId: string
 	name?: string
-	description?: string
 	role?: string
 	className?: string
 }
 
 export default function StoreCard({
+	storeId,
 	name = "Nama Toko",
-	description = "Pilih toko ini untuk melanjutkan",
 	role,
 	className
 }: StoreCardProps) {
+	const { update } = useSession()
+	const router = useRouter()
+	const [isPending, startTransition] = useTransition()
+
+	const handleSelectStore = () => {
+		if (isPending) return
+
+		startTransition(async () => {
+			try {
+				const result = await selectStoreAction(storeId)
+
+				if (result.error) {
+					toast.error(result.error)
+					return
+				}
+
+				if (result.success && result.token) {
+					toast.success(result.message || "Berhasil masuk ke toko")
+					await update({ tenantToken: result.token })
+					router.push("/")
+					router.refresh()
+				}
+			} catch (error) {
+				toast.error("Terjadi kesalahan sistem")
+			}
+		})
+	}
+
 	return (
-		<Card className={cn(
-			"w-64 cursor-pointer transition-all duration-500 ease-out",
-			"hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2",
-			"group border-2 hover:border-primary/40 overflow-hidden",
-			className
-		)}>
+		<Card 
+			onClick={handleSelectStore}
+			className={cn(
+				"w-64 cursor-pointer transition-all duration-500 ease-out",
+				"hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2",
+				"group border-2 hover:border-primary/40 overflow-hidden",
+				isPending && "opacity-70 pointer-events-none animate-pulse",
+				className
+			)}
+		>
 			<CardContent className="flex flex-col items-center justify-center p-4 gap-4">
 				<div className="relative">
 					<div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700 ease-out opacity-0 group-hover:opacity-100" />

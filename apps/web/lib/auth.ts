@@ -3,6 +3,8 @@ import NextAuth from "next-auth";
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { LoginResponse } from "@/modules/auth/types";
+import { User } from "@auth/core/types";
+import { jwtDecode } from "jwt-decode";
 
 export const authConfig: NextAuthConfig = {
 	providers: [
@@ -24,7 +26,7 @@ export const authConfig: NextAuthConfig = {
 				});
 
 				const result = await res.json()
-				
+
 				if (!res.ok) {
 					throw new Error(result.error || "Kredensial salah")
 				}
@@ -38,25 +40,63 @@ export const authConfig: NextAuthConfig = {
 					name: data.user.name,
 					token: data.token,
 					adminLevel: data.user.admin_level,
-					stores: data.stores || []
+					stores: data.stores
 				}
 			}
 		})
 	],
 	callbacks: {
-		async jwt({ token, user }) {
+		async jwt({ token, user, trigger, session }) {
 			if (user) {
-				token.adminLevel = (user as any).adminLevel;
-				token.stores = (user as any).stores;
-				token.backendToken = (user as any).token;
+				const u = user as any
+				token.user = {
+					id: u.id,
+					email: u.email,
+					name: u.name,
+					adminLevel: u.adminLevel,
+				}
+				token.stores = user.stores
+				token.backendToken = user.token
+			}
+			if (trigger === "update" && session?.tenantToken) {
+				token.backendToken = session.tenantToken
+				try {
+					const decoded: any = jwtDecode(session.tenantToken)
+					if (token.user) {
+						token.user = {
+							...token.user,
+							role: decoded.user.role,
+							permissions: decoded.user.permissions
+						}
+					}
+					token.storeContext = {
+						id: decoded.store.store_id,
+						name: decoded.store.name,
+						slug: decoded.store.store_slug,
+						schemaName: decoded.store.schema_name
+					}
+				} catch (error) {
+					console.error("Failed to decode tenant token", error)
+				}
 			}
 			return token;
 		},
 		async session({ session, token }) {
-			if (session.user) {
-				(session.user as any).adminLevel = token.adminLevel;
-				(session.user as any).stores = token.stores;
+			if (session.user && token.user) {
+				session.user = {
+					...session.user,
+					id: token.user.id,
+					role: token.user.role,
+					permissions: token.user.permissions,
+					adminLevel: token.user.adminLevel as 'SUPERADMIN' | 'ADMIN' | undefined
+				};
+				(session as any).stores = token.stores;
 				(session as any).backendToken = token.backendToken;
+
+				if (token.storeContext) {
+					(session as any).store = token.storeContext;
+				}
+
 			}
 			return session;
 		},

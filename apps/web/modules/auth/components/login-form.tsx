@@ -1,6 +1,6 @@
 "use client"
 
-import { signIn, useSession } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { cn } from "@workspace/ui/lib/utils"
 import { Button } from "@workspace/ui/components/button"
 import {
