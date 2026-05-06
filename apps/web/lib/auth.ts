@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import { LoginResponse } from "@/modules/auth/types";
 import { User } from "@auth/core/types";
 import { jwtDecode } from "jwt-decode";
+import Google from "next-auth/providers/google";
 
 export const authConfig: NextAuthConfig = {
 	providers: [
@@ -43,9 +44,28 @@ export const authConfig: NextAuthConfig = {
 					stores: data.stores
 				}
 			}
+		}),
+		Google({
+			clientId: process.env.AUTH_CLIENT_ID!,
+			clientSecret: process.env.AUTH_CLIENT_SECRET!,
 		})
 	],
 	callbacks: {
+		async signIn({ account, profile }) {
+			if (account?.provider === "google") {
+				const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/register`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						idToken: account.userId
+					})
+				})
+				return res.ok
+			}
+			return true
+		},
 		async jwt({ token, user, trigger, session }) {
 			if (user) {
 				const u = user as any
