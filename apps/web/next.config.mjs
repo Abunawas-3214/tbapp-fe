@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@workspace/ui"],
-  allowedDevOrigins: ["tbapp.test", "*.tbapp.test"]
+  allowedDevOrigins: ["tbapp.dev", "*.tbapp.dev"]
 }
 
 export default nextConfig

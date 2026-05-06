@@ -28,16 +28,16 @@ export default async function Page() {
               </Link>
             )}
             {session?.stores && (
-              (!session.stores) ?
+              (!session.store) ?
                 <Link href={"/pilih-toko"}>
                   <Button>Pilih Toko</Button>
                 </Link> :
-                <Link href={"https://app.tbapp.test"}>
+                <Link href={"https://app.tbapp.dev"}>
                   <Button>Masuk ruang kerja toko: {session.store?.name} </Button>
                 </Link>
             )}
             {session?.user.adminLevel && (
-              <Link href={"https://admin.tbapp.test"}>
+              <Link href={"https://admin.tbapp.dev"}>
                 <Button>Masuk ruang kerja admin</Button>
               </Link>
             )}

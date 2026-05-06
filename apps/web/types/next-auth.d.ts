@@ -1,7 +1,7 @@
 import { DefaultSession } from "next-auth";
 import { StoreAccessDTO } from "@/modules/auth/types";
 
-declare module "@auth/core/types" {
+declare module "next-auth" {
   interface User {
     adminLevel?: 'SUPERADMIN' | 'ADMIN';
     stores?: StoreAccessDTO[];
@@ -23,6 +23,10 @@ declare module "@auth/core/types" {
       permissions?: any;
       adminLevel?: 'SUPERADMIN' | 'ADMIN';
     } & DefaultSession["user"];
+  }
+
+  interface Account {
+    id_token?: string;
   }
 }
 

@@ -39,30 +39,55 @@ export const authConfig: NextAuthConfig = {
 					id: data.user.id,
 					email: data.user.email,
 					name: data.user.name,
-					token: data.token,
+					backendToken: data.token,
 					adminLevel: data.user.admin_level,
 					stores: data.stores
 				}
 			}
 		}),
 		Google({
-			clientId: process.env.AUTH_CLIENT_ID!,
-			clientSecret: process.env.AUTH_CLIENT_SECRET!,
+			clientId: process.env.GOOGLE_CLIENT_ID!,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+			authorization: {
+				params: {
+					prompt: "consent",
+					access_type: "offline",
+					response_type: "code",
+				},
+			},
 		})
 	],
 	callbacks: {
-		async signIn({ account, profile }) {
+		async signIn({ account, user }) {
 			if (account?.provider === "google") {
-				const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/register`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						idToken: account.userId
-					})
-				})
-				return res.ok
+				try {
+					const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google-login`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ id_token: account.id_token })
+					});
+
+					if (!res.ok) {
+						const errorData = await res.json()
+						console.error("Gagal login dengan Google", errorData.message)
+						return false
+					}
+
+					const data: LoginResponse = await res.json()
+
+					const u = user as any
+					u.id = data.user.id
+					u.email = data.user.email
+					u.name = data.user.name
+					u.backendToken = data.token
+					u.adminLevel = data.user.admin_level
+					u.stores = data.stores
+
+					return true
+				} catch (error) {
+					console.error("Connection to Backend failed", error)
+					return false
+				}
 			}
 			return true
 		},
@@ -75,8 +100,8 @@ export const authConfig: NextAuthConfig = {
 					name: u.name,
 					adminLevel: u.adminLevel,
 				}
-				token.stores = user.stores
-				token.backendToken = user.token
+				token.stores = u.stores
+				token.backendToken = u.backendToken
 			}
 			if (trigger === "update" && session?.tenantToken) {
 				token.backendToken = session.tenantToken
@@ -91,7 +116,7 @@ export const authConfig: NextAuthConfig = {
 					}
 					token.storeContext = {
 						id: decoded.store.store_id,
-						name: decoded.store.name,
+						name: decoded.store.store_name,
 						slug: decoded.store.store_slug,
 						schemaName: decoded.store.schema_name
 					}
@@ -128,7 +153,7 @@ export const authConfig: NextAuthConfig = {
 				httpOnly: true,
 				sameSite: "lax",
 				path: "/",
-				domain: ".tbapp.test",
+				domain: ".tbapp.dev",
 				secure: process.env.NODE_ENV === "production",
 			},
 		},
